@@ -1,0 +1,30 @@
+#% text_encoding = iso8859_1
+_package user
+# Copyright © 2004 Minto Spatial Solutions Ltd.
+#
+# This software is released under the terms of version 2 of the
+# GNU General Public License.  The full license text is
+# provided in the license.txt file in the mss product
+# directory, and is also available at http://www.fsf.org.
+
+_pragma(classify_level=advanced)
+_method layout_plugin.mss_start_layout_designer()
+	## 
+	## Same as start_layout_designer(), except that it also returns
+	## the resulting application and the layout manager plugin.
+	##
+
+	an_app << _self.activate_as_dialog(:layout_designer)
+	
+	a_layout_manager << an_app.plugin(:layout_manager)
+	a_layout_manager.post_init_layout_handlers(_self.map_manager, _self.gs_factory)
+	_if (dir << _self.template_directory) _isnt _unset _andif
+	    a_layout_manager.get_preference(:saved_layouts_folder) _is _unset
+	_then
+		a_layout_manager.set_preference(:saved_layouts_folder, dir)
+	_endif
+	
+	_return an_app, a_layout_manager
+	
+_endmethod
+$

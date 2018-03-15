@@ -1,0 +1,54 @@
+#% text_encoding = iso8859_1
+_package user
+# Copyright © 2004 Minto Spatial Solutions Ltd.
+#
+# This software is released under the terms of version 2 of the
+# GNU General Public License.  The full license text is
+# provided in the license.txt file in the mss product
+# directory, and is also available at http://www.fsf.org.
+
+_pragma(classify_level=restricted)
+_method geometry_set_factory.get_application_world_for_world( a_world )
+	## 
+	## Returns a composite world containing A_WORLD and all
+	## 'matching' worlds.
+	## It may return an empty composite world instance.
+
+	# 2004/09/29 TM  For worlds outside of universe 0, get
+	#                matching worlds by name rather than
+	#                by ID number.
+	# 2011/04/25 TM  Updated for V4.2 compatibility.
+	
+	_if a_world.composite?
+	_then
+		cw << a_world
+	# START CHANGE
+	_else
+		_if (uid << a_world.universe_id) = 0 _orif
+		    (a_ds_world << a_world.vmds_dataset_worlds.an_element()) _is _unset 
+		_then 
+			# Standard ID-based processing for default universe.
+			_if (cw << _self.get_application_world(uid, a_world.world_id)) _is _unset
+			_then
+				cw << composite_world.new(_unset, {})
+			_endif
+		_else
+			# Name-based processing for other universes.
+			# Note that this name-based processing will potentially allow
+			# an internal to show data from two or more datasets, if the
+			# corresponding world from each dataset has the same universe
+			# name and world name.  This would not be possible if ID-based
+			# processing is done, since world_id is an arbitrary
+			# system-generated value in each dataset.
+			_if (cw << _self.get_application_world(a_ds_world.universe.name, a_ds_world.name)) _is _unset
+			_then
+				cw << composite_world.new(_unset, {})
+			_endif
+		_endif
+	_endif 
+	# END CHANGE
+	
+	>> cw
+	
+_endmethod
+$
